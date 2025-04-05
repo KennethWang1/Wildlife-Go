@@ -19,10 +19,46 @@ const Home = () => {
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
 
+  function dataURItoBlob(dataURI) {
+    // convert base64/URLEncoded data component to raw binary data held in a string
+    var byteString;
+    if (dataURI.split(',')[0].indexOf('base64') >= 0)
+        byteString = atob(dataURI.split(',')[1]);
+    else
+        byteString = unescape(dataURI.split(',')[1]);
+
+    // separate out the mime component
+    var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+
+    // write the bytes of the string to a typed array
+    var ia = new Uint8Array(byteString.length);
+    for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+    }
+
+    return new Blob([ia], {type:mimeString});
+  }
+
+  const handleUpload = (image) => {
+    const formData = new FormData();
+
+    const file = dataURItoBlob(image);
+
+    formData.append('image', file)
+
+    return formData;
+  }
+
   const handleCapture = async (imageDataUrl: string) => {
     setIsCameraOpen(false);
     setIsClassifying(true);
+
+    fetch('/api/v1/uploadCard', {
+      method: "POST",
+      body: handleUpload(imageDataUrl)
+    })
     
+
     try {
       if (captureMode === 'animal') {
         // Try to classify as an animal
@@ -75,10 +111,15 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pt-[20vh]">
       <main className="flex-1 container max-w-md py-6 px-4">
+        
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2 text-primary-foreground">Fauna Snap Arena</h1>
+          <img 
+              src="/public/assets/logo-no-shadow.png" 
+              alt="Wildlife Go" 
+              className="h-auto w-full sm:w-11/12 md:w-2/2 max-w-[2000px] mx-auto mb-2" 
+            />
           <p className="text-muted-foreground mb-6">Capture, collect, and battle with animals!</p>
           
           {!isAuthenticated && (
@@ -161,7 +202,7 @@ const Home = () => {
         <DialogContent>
           <DialogTitle>How to Play</DialogTitle>
           <DialogDescription className="space-y-4">
-            <p className="mb-2">Welcome to Fauna Snap Arena! Here's how to play:</p>
+            <p className="mb-2">Welcome Wildlife Go! Here's how to play:</p>
             
             <div className="space-y-1">
               <h3 className="font-bold">Catching Animals</h3>
