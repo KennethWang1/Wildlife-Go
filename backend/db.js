@@ -196,7 +196,7 @@ export async function setElo(username, elo) {
     const userDoc = await getDoc(userDocRef); // Fetch the document
 
     if (userDoc.exists()) {
-        await updateDoc(doc(firestore, "userCards", username), {
+        await updateDoc(doc(firestore, "elo", username), {
             elo:elo});
     } else {
         console.log("No such user document!");
