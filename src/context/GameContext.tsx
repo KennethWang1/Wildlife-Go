@@ -87,12 +87,16 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         animals: [...prev.animals, animal]
       };
     });
-    
-    toast({
-      title: `Captured ${animal.name}!`,
-      description: `Rarity: ${animal.rarity.charAt(0).toUpperCase() + animal.rarity.slice(1)}`,
-      variant: "default",
-    });
+
+    try{
+      toast({
+        title: `Captured ${animal.name}!`,
+        description: `Rarity: ${animal.rarity.charAt(0).toUpperCase() + animal.rarity.slice(1)}`,
+        variant: "default",
+      });
+    } catch {
+      console.log(animal.rarity)
+    }
   };
   
   const addPlant = (plantData: Omit<Plant, 'id' | 'expiry'> & { imageDataUrl: string }) => {

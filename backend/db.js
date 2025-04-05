@@ -127,8 +127,14 @@ export async function upload(image, username) {
 
     parsedResponse = JSON.parse(text.substring(text.indexOf("{")).replace("```", ""))
 
+    console.log(parsedResponse)
+    parsedResponse.heatlth+=500;
+    parsedResponse.attack+=50;
+    
+
     if (parsedResponse.animal == "none") {
-        return res.status(400).json({ "error": "No animal found in the picture" })
+        // return res.status(400).json({ "error": "No animal found in the picture" })
+        return false
     }
 
     const auth = getAuth(); // Use the initialized client app

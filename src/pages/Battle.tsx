@@ -10,6 +10,42 @@ import { Animal, BattleResult as BattleResultType } from '@/types';
 import { simulateBattle } from '@/utils/gameLogic';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { useToast } from '@/components/ui/use-toast';
+
+function setElo(username, elo) {
+
+  const headers = new Headers();
+  headers.append("Content-Type", "application/json")
+
+  fetch("http://localhost:3000/api/v1/setElo", {
+    method: "POST", 
+    headers: headers,
+    body: JSON.stringify({
+      "username": username,
+      "elo": elo
+    })
+  })
+
+}
+
+
+function getCookie(cname) {
+  let name = cname + "=";
+  let ca = document.cookie.split(';');
+  for(let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+
+
+
 
 const Battle = () => {
   const { user, activeTeam, updateElo } = useGame();
@@ -56,7 +92,23 @@ const Battle = () => {
     
     // Generate opponent team
     const opponentTeam = generateOpponent();
-    
+
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json")
+  
+    fetch("http://localhost:3000/api/v1/findFight", {
+      method: "POST", 
+      headers: headers,
+      body: JSON.stringify({
+        "username": getCookie("username"),
+      })
+    })
+    .then(r => r.json())
+    .then(r => {
+      console.log(r)
+      
+    })
+
     // Simulate progress animation
     const simulationTime = 3000; // 3 seconds
     const interval = 50; // Update every 50ms
@@ -74,7 +126,11 @@ const Battle = () => {
         if (user) {
           const result = simulateBattle(activeTeam, opponentTeam, user.elo, user.elo);
           setBattleResult(result);
-          updateElo(result.eloChange);
+
+          setElo(getCookie("username"), user.elo + result.eloChange)
+
+          updateElo(result.eloChange)
+
         }
         
         setIsBattling(false);

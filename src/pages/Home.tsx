@@ -51,13 +51,19 @@ const Home = () => {
     }).then(
       response => response.json()
     ).then(async r => {
+
       if (r['error'] !== undefined) {
         throw new Error("error")
       } else {
+
+        r = r.stats 
+
+        console.log(r)
+
         r['critDamage'] = r['critical_damage']
         r['critChance'] = r['critical_chance']
         addAnimal({
-          name: r.name,
+          name: r.animal,
           rarity: r.rarity,
           stats: r,
           imageDataUrl: imageDataUrl

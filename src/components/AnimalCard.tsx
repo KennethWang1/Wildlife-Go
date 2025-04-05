@@ -67,7 +67,7 @@ const AnimalCard: React.FC<AnimalCardProps> = ({
           <div>
             <h3 className="text-lg font-bold line-clamp-1">{animal.name}</h3>
             <Badge variant="outline" className={`${getRarityColor()} text-xs`}>
-              {animal.rarity.charAt(0).toUpperCase() + animal.rarity.slice(1)}
+              {animal.rarity == undefined ? "rare" : animal.rarity.charAt(0).toUpperCase() + animal.rarity.slice(1)}
             </Badge>
           </div>
           {showDeleteButton && (
