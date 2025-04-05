@@ -47,7 +47,12 @@ export async function signup(email, password, username) {
       email: email, // You might want to store the email as well
     });
 
+    await setDoc(doc(firestore, "elo", username), {
+        elo: 1000,
+    });
+
     console.log("Sign up success! User:", user.uid, "Username:", username);
+    
     return true;
   } catch (error) {
     const errorCode = error.code;
@@ -148,5 +153,46 @@ export async function upload(image, username) {
                 }
             ]});
       }
+      console.log(parsedResponse);
     return true;
+}
+
+export async function getUserCards(username) {
+    const firestore = getFirestore(firebaseApp); // Use the client Firestore instance
+    const userDocRef = doc(firestore, "userCards", username); // Reference to the user's document
+    const userDoc = await getDoc(userDocRef); // Fetch the document
+
+    if (userDoc.exists()) {
+        return userDoc.data();
+    } else {
+        console.log("No such user document!");
+        return null;
+    }
+}
+
+export async function getElo(username) {
+    const firestore = getFirestore(firebaseApp); // Use the client Firestore instance
+    const userDocRef = doc(firestore, "elo", username); // Reference to the user's document
+    const userDoc = await getDoc(userDocRef); // Fetch the document
+
+    if (userDoc.exists()) {
+        return userDoc.data().elo;
+    } else {
+        console.log("No such user document!");
+        return null;
+    }
+}
+
+export async function setElo(username, elo) {
+    const firestore = getFirestore(firebaseApp); // Use the client Firestore instance
+    const userDocRef = doc(firestore, "elo", username); // Reference to the user's document
+    const userDoc = await getDoc(userDocRef); // Fetch the document
+
+    if (userDoc.exists()) {
+        await updateDoc(doc(firestore, "userCards", username), {
+            elo:elo});
+    } else {
+        console.log("No such user document!");
+        return null;
+    }
 }
