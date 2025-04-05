@@ -128,7 +128,7 @@ export async function upload(image, username) {
     parsedResponse = JSON.parse(text.substring(text.indexOf("{")).replace("```", ""))
 
     console.log(parsedResponse)
-    parsedResponse.heatlth+=500;
+    parsedResponse.health+=500;
     parsedResponse.attack+=50;
     
 
