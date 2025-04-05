@@ -52,6 +52,8 @@ const Battle = () => {
   const [isBattling, setIsBattling] = useState(false);
   const [battleProgress, setBattleProgress] = useState(0);
   const [battleResult, setBattleResult] = useState<BattleResultType | null>(null);
+
+  const { toast } = useToast()
   
   const generateOpponent = () => {
     if (!user) return [];
@@ -91,7 +93,7 @@ const Battle = () => {
     setBattleProgress(0);
     
     // Generate opponent team
-    const opponentTeam = generateOpponent();
+    let opponentTeam = generateOpponent();    
 
     const headers = new Headers();
     headers.append("Content-Type", "application/json")
@@ -105,37 +107,46 @@ const Battle = () => {
     })
     .then(r => r.json())
     .then(r => {
-      console.log(r)
+      
+      if (r == null) {
+        toast({
+          title: "No Team Found To Fight",
+          description: "Wait for more users"
+        })
+        setIsBattling(false);
+        return;
+      } 
+
+      // Simulate progress animation
+      const simulationTime = 3000; // 3 seconds
+      const interval = 50; // Update every 50ms
+      const steps = simulationTime / interval;
+      let currentStep = 0;
+      
+      const progressInterval = setInterval(() => {
+        currentStep++;
+        setBattleProgress(Math.min(100, (currentStep / steps) * 100));
+        
+        if (currentStep >= steps) {
+          clearInterval(progressInterval);
+          
+          // Execute actual battle simulation
+          if (user) {
+            const result = simulateBattle(activeTeam, opponentTeam, user.elo, user.elo);
+            setBattleResult(result);
+
+            setElo(getCookie("username"), user.elo + result.eloChange)
+
+            updateElo(result.eloChange)
+
+
+          }
+          
+          setIsBattling(false);
+        }
+      }, interval);
       
     })
-
-    // Simulate progress animation
-    const simulationTime = 3000; // 3 seconds
-    const interval = 50; // Update every 50ms
-    const steps = simulationTime / interval;
-    let currentStep = 0;
-    
-    const progressInterval = setInterval(() => {
-      currentStep++;
-      setBattleProgress(Math.min(100, (currentStep / steps) * 100));
-      
-      if (currentStep >= steps) {
-        clearInterval(progressInterval);
-        
-        // Execute actual battle simulation
-        if (user) {
-          const result = simulateBattle(activeTeam, opponentTeam, user.elo, user.elo);
-          setBattleResult(result);
-
-          setElo(getCookie("username"), user.elo + result.eloChange)
-
-          updateElo(result.eloChange)
-
-        }
-        
-        setIsBattling(false);
-      }
-    }, interval);
   };
   
   const closeBattleResult = () => {
