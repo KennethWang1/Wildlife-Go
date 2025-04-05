@@ -196,3 +196,36 @@ export async function setElo(username, elo) {
         return null;
     }
 }
+
+export async function findUserFight(username){
+    const firestore = getFirestore(firebaseApp); // Use the client Firestore instance
+
+    try {
+        const userCardsCollection = firestore.collection("userCards"); // Reference to the userCards collection
+        const snapshot = await userCardsCollection.get(); // Fetch all documents in the collection
+
+        if (snapshot.empty) {
+            console.log("No users found in the userCards collection!");
+            return null;
+        }
+
+        const users = [];
+        snapshot.forEach(doc => {
+            if (doc.id !== username) { // Exclude the current user
+                users.push({ username: doc.id, cards: doc.data().cards });
+            }
+        });
+
+        if (users.length === 0) {
+            console.log("No other users available for a fight!");
+            return null;
+        }
+
+        const randomUser = users[Math.floor(Math.random() * users.length)]; // Select a random user
+
+        return { username: randomUser.username, card: [randomUser.cards[0], randomUser.cards[1], randomUser.cards[2]] };
+    } catch (error) {
+        console.error("Error fetching user cards:", error);
+        return null;
+    }
+}
