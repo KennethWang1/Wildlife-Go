@@ -23,13 +23,17 @@ const Login = () => {
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-b from-background to-muted/30">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h1 className="text-4xl font-bold mb-2 text-primary-foreground">Fauna Snap Arena</h1>
+          <img 
+              src="/public/assets/logo-no-shadow.png" 
+              alt="Wildlife Go" 
+              className="h-auto w-full sm:w-11/12 md:w-2/2 max-w-[2000px] mx-auto mb-2" 
+          />
           <p className="text-muted-foreground mb-6">Capture, collect, and battle with animals!</p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Welcome to Fauna Snap Arena</CardTitle>
+            <CardTitle>Welcome to Wildlife Go</CardTitle>
             <CardDescription>
               Login to start your adventure catching animals and battling with your collection!
             </CardDescription>
@@ -47,7 +51,7 @@ const Login = () => {
                   Login to Play
                 </Button>
                 <div className="text-center text-sm text-muted-foreground">
-                  <p>New to Fauna Snap Arena? <Link to="/signup" className="text-primary hover:underline">Create an account</Link> to start your journey.</p>
+                  <p>New to Wildlife Go? <Link to="/signup" className="text-primary hover:underline">Create an account</Link> to start your journey.</p>
                 </div>
               </div>
             )}

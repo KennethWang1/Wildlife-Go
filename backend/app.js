@@ -7,6 +7,8 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import path from 'path';
 
+import {GoogleGenAI, createUserContent} from '@google/genai'
+
 const app = express();
 const port = process.env.PORT || 3000;
 

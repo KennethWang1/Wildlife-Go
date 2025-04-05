@@ -10,7 +10,7 @@ interface GameContextProps {
   animals: Animal[];
   plants: Plant[];
   activeTeam: Animal[];
-  addAnimal: (animal: Omit<Animal, 'id' | 'captured' | 'stats'> & { imageDataUrl: string }) => void;
+  addAnimal: (animal: any & { imageDataUrl: string }) => void;
   addPlant: (plant: Omit<Plant, 'id' | 'expiry'> & { imageDataUrl: string }) => void;
   removeAnimal: (id: string) => void;
   updateActiveTeam: (animalIds: string[]) => void;
@@ -65,10 +65,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(newUser);
   };
   
-  const addAnimal = (animalData: Omit<Animal, 'id' | 'captured' | 'stats'> & { imageDataUrl: string }) => {
+  const addAnimal = (animalData: any & { imageDataUrl: string }) => {
     if (!user) return;
     
-    const stats = generateStats(animalData.rarity);
+    // const stats = generateStats(animalData.rarity);
+    const stats = animalData.stats
     const animal: Animal = {
       id: uuidv4(),
       name: animalData.name,

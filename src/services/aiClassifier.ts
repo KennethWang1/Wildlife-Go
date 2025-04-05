@@ -88,10 +88,10 @@ export const classifyImage = async (imageDataUrl: string): Promise<{
 // In a real implementation, this would be integrated with Gemini
 export const classifyAnimalImage = async (imageDataUrl: string) => {
   const result = await classifyImage(imageDataUrl);
-  if (result.type === 'animal') {
+  if (true) {
     return {
       name: result.name,
-      rarity: result.rarity!,
+      rarity: result.rarity || "common",
       food: result.food!,
       imageDataUrl
     };

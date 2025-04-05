@@ -22,51 +22,40 @@ const Home = () => {
   const handleCapture = async (imageDataUrl: string) => {
     setIsCameraOpen(false);
     setIsClassifying(true);
-    
-    try {
-      if (captureMode === 'animal') {
-        // Try to classify as an animal
-        try {
-          const animalResult = await classifyAnimalImage(imageDataUrl);
-          addAnimal({
-            ...animalResult,
-            imageUrl: animalResult.imageDataUrl
-          });
-        } catch (animalError) {
-          // If not an animal, show error
-          toast({
-            title: "Classification Failed",
-            description: "We couldn't identify an animal in this image. Please try again with a clearer picture.",
-            variant: "destructive",
-          });
-        }
+
+    fetch('http://localhost:3000/api/v1/test', {
+      method: "POST",
+      body: JSON.stringify({
+        "image": imageDataUrl,
+      })
+    }).then(
+      response => response.json()
+    ).then(async r => {
+      if (r['error'] !== undefined) {
+        throw new Error("error")
       } else {
-        // Try to classify as a plant
-        try {
-          const plantResult = await classifyPlantImage(imageDataUrl);
-          addPlant({
-            ...plantResult,
-            imageUrl: plantResult.imageDataUrl
-          });
-        } catch (plantError) {
-          // If not a plant, show error
-          toast({
-            title: "Classification Failed",
-            description: "We couldn't identify a plant in this image. Please try again with a clearer picture.",
-            variant: "destructive",
-          });
-        }
+        r['critDamage'] = r['critical_damage']
+        r['critChance'] = r['critical_chance']
+        addAnimal({
+          name: r.name,
+          rarity: r.rarity,
+          stats: r,
+          imageDataUrl: imageDataUrl
+        })
       }
-    } catch (err) {
-      console.error('Error during classification:', err);
+    })
+    .finally(() => {
+      setIsClassifying(false);
+    })
+    .catch(err => {
+      console.log(err)
       toast({
-        title: "Error",
-        description: "Something went wrong during classification. Please try again.",
+        title: "Classification Failed",
+        description: "We couldn't identify an animal in this image. Please try again with a clearer picture.",
         variant: "destructive",
       });
-    } finally {
-      setIsClassifying(false);
-    }
+    })
+      
   };
 
   const openCamera = (mode: 'animal' | 'plant') => {
@@ -75,10 +64,15 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pt-[20vh]">
       <main className="flex-1 container max-w-md py-6 px-4">
+        
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2 text-primary-foreground">Fauna Snap Arena</h1>
+          <img 
+              src="/public/assets/logo-no-shadow.png" 
+              alt="Wildlife Go" 
+              className="h-auto w-full sm:w-11/12 md:w-2/2 max-w-[2000px] mx-auto mb-2" 
+            />
           <p className="text-muted-foreground mb-6">Capture, collect, and battle with animals!</p>
           
           {!isAuthenticated && (
@@ -113,7 +107,7 @@ const Home = () => {
                 </div>
               </Button>
               
-              <Button 
+              {/* <Button 
                 size="lg" 
                 className="h-20 flex items-center gap-2 text-lg relative overflow-hidden bg-gradient-to-r from-green-500 to-green-700"
                 onClick={() => openCamera('plant')}
@@ -124,7 +118,7 @@ const Home = () => {
                   <Leaf size={24} />
                   <span>Gather a Plant</span>
                 </div>
-              </Button>
+              </Button> */}
               
               <Button 
                 size="lg" 
@@ -161,7 +155,7 @@ const Home = () => {
         <DialogContent>
           <DialogTitle>How to Play</DialogTitle>
           <DialogDescription className="space-y-4">
-            <p className="mb-2">Welcome to Fauna Snap Arena! Here's how to play:</p>
+            <p className="mb-2">Welcome Wildlife Go! Here's how to play:</p>
             
             <div className="space-y-1">
               <h3 className="font-bold">Catching Animals</h3>
