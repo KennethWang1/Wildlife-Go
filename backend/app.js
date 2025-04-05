@@ -23,19 +23,24 @@ app.use(express.json({ limit: '100mb' }));
 app.use(bodyParser.json({ limit: '100mb', extended: true, parameterLimit: 10000000 }));
 app.use(bodyParser.urlencoded({ limit: '100mb', extended: true, parameterLimit: 10000000 }));
 
-app.post('/api/v1/signup', (req, res) => {
+app.post('/api/v1/signup', async (req, res) => {
     const { email, password, username } = req.body;
-    signup(email, password, username);
-    res.status(200).json({ message: 'User created successfully' });
+    let hi = await signup(email, password, username);
+    console.log(hi)
+    if (hi) {
+        res.status(200).json({ message: 'User created successfully' });
+    } else {
+        res.status(401).json({ message: "No user for you nuh uh", "error": "error :("})
+    }
 });
 
-app.get('/api/v1/login', async (req, res) => {
+app.post('/api/v1/login', async (req, res) => {
     const { email, password } = req.body;
     const response = await login(email, password);
     if(response.success == true) {
         res.status(200).json({ message: 'Login Sucessful', username: response.username });
     }else{
-        res.status(401).json({ message: 'Invalid credentials' });
+        res.status(401).json({ message: 'Invalid credentials', error: "adsdasdads" });
     }
 });
 

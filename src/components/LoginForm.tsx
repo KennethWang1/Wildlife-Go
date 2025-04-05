@@ -11,6 +11,13 @@ interface LoginFormProps {
   onSuccess: () => void;
 }
 
+function setCookie(cname, cvalue, exdays) {
+  const d = new Date();
+  d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+  let expires = "expires="+d.toUTCString();
+  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
 const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,23 +30,49 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     setIsLoading(true);
 
     try {
-      await login(email, password);
-      
-      toast({
-        title: "Login Successful",
-        description: "You have successfully logged in.",
-      });
-      
-      onSuccess();
+
+      const headers = new Headers();
+      headers.append("Content-Type", "application/json")
+
+      fetch("http://localhost:3000/api/v1/login", {
+        method: "POST", 
+        headers: headers,
+        body: JSON.stringify({
+          "email": email,
+          "password": password
+        })
+      })
+      .then(r => r.json())
+      .then(async r => {
+        if (r['error'] !== undefined) throw new Error("error :(")
+
+          setCookie("username", r.username, 999999)
+
+        toast({
+          title: "Login Successful",
+          description: "Account successfully logged in.",
+        });
+
+        await login(email, password)
+
+        onSuccess();
+      })
+      .catch (err => {
+        console.log(err)
+        toast({
+          title: "Login Failed",
+          description: "Wrong email or password",
+          variant: "destructive",
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
+      })
+    
     } catch (error) {
-      toast({
-        title: "Login Failed",
-        description: "Please enter valid credentials.",
-        variant: "destructive",
-      });
     } finally {
-      setIsLoading(false);
     }
+
   };
 
   return (

@@ -11,6 +11,7 @@ interface SignupFormProps {
 }
 
 const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
+  const [username, setUsername] = useState('')
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -34,27 +35,61 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
     }
 
     try {
-      await signup(email, password);
+
+      const headers = new Headers();
+      headers.append("Content-Type", "application/json")
+
+      fetch("http://localhost:3000/api/v1/signup", {
+        method: "POST", 
+        headers: headers,
+        body: JSON.stringify({
+          "username": username,
+          "email": email,
+          "password": password
+        })
+      })
+      .then(r => r.json())
+      .then(r => {
+
+        if (r['error'] !== undefined) throw new Error("error :(")
+
+        toast({
+          title: "Signup Successful",
+          description: "Your account has been created successfully.",
+        });
+
+        onSuccess();
+      })
+      .catch (err => {
+        console.log(err)
+        toast({
+          title: "Signup Failed",
+          description: "Something went wrong :(",
+          variant: "destructive",
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
+      })
       
-      toast({
-        title: "Signup Successful",
-        description: "Your account has been created successfully.",
-      });
-      
-      onSuccess();
     } catch (error) {
-      toast({
-        title: "Signup Failed",
-        description: "Please try again with a different email.",
-        variant: "destructive",
-      });
     } finally {
-      setIsLoading(false);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+      <div className="space-y-2">
+        <Label htmlFor="email">Username</Label>
+        <Input
+          id="username"
+          type="text"
+          placeholder="Your username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
+      </div>
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input

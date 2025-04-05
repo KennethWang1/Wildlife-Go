@@ -10,6 +10,21 @@ import { useAuth } from '@/context/AuthContext';
 import { classifyAnimalImage, classifyPlantImage } from '@/services/aiClassifier';
 import { useToast } from '@/components/ui/use-toast';
 
+function getCookie(cname) {
+  let name = cname + "=";
+  let ca = document.cookie.split(';');
+  for(let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+
 const Home = () => {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isClassifying, setIsClassifying] = useState(false);
@@ -23,10 +38,15 @@ const Home = () => {
     setIsCameraOpen(false);
     setIsClassifying(true);
 
-    fetch('http://localhost:3000/api/v1/test', {
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json")
+
+    fetch('http://localhost:3000/api/v1/uploadCard', {
       method: "POST",
+      headers: headers,
       body: JSON.stringify({
         "image": imageDataUrl,
+        "username": getCookie("username")
       })
     }).then(
       response => response.json()
@@ -162,11 +182,11 @@ const Home = () => {
               <p>Take pictures of animals to capture them. Each animal has unique stats and a rarity level.</p>
             </div>
             
-            <div className="space-y-1">
+            {/* <div className="space-y-1">
               <h3 className="font-bold">Gathering Plants</h3>
               <p>Find plants to gather for buffs. Plants can boost the stats of animals that eat them.</p>
             </div>
-            
+             */}
             <div className="space-y-1">
               <h3 className="font-bold">Battle System</h3>
               <p>Create a team of 3 animals and battle against opponents to increase your ELO ranking.</p>
