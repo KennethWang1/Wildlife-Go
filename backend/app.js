@@ -48,8 +48,8 @@ app.post('/api/v1/uploadCard', async (req, res) => {
     }
 
     const result = await upload(file, username);
-    if (result) {
-        res.status(200).json({ success: true, downloadURL: result.downloadURL });
+    if (result != false) {
+        res.status(200).json({ success: true, stats: result });
     } else {
         res.status(500).json({ success: false, message: result.message });
     }

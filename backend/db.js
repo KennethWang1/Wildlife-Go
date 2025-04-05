@@ -153,8 +153,8 @@ export async function upload(image, username) {
                 }
             ]});
       }
-      console.log(parsedResponse);
-    return true;
+      
+    return parsedResponse;
 }
 
 export async function getUserCards(username) {
