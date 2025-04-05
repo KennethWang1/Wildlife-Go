@@ -1,10 +1,13 @@
 import admin from 'firebase-admin';
 import { initializeApp } from "firebase/app"; // Import the Firebase client SDK
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore"; // Add getDoc to the importsimport dotenv from 'dotenv';
+import { getFirestore, doc, setDoc, getDoc, updateDoc } from "firebase/firestore"; // Add getDoc to the importsimport dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
+import base64Img from 'base64-img'; 
+import { GoogleGenAI, createUserContent, createPartFromUri } from '@google/genai';
+
 
 
 dotenv.config({ path: './.env' });
@@ -16,7 +19,7 @@ const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
-/*
+
 // Initialize Firebase Client SDK
 const firebaseConfig = {
   apiKey: process.env.DB_API_KEY,
@@ -25,19 +28,8 @@ const firebaseConfig = {
   storageBucket: process.env.STORAGE_BUCKET,
   messagingSenderId: process.env.MESSEGAGING_SENDER_ID,
   appId: process.env.APP_ID,
+  measurementId: process.env.MEASUREMENT_ID
 };
-*/
-
-const firebaseConfig = {
-    apiKey: "AIzaSyC0CpwZTi5XpiVD6Je9bn406fd4Xg6sBtY",
-    authDomain: "wildlife-go.firebaseapp.com",
-    projectId: "wildlife-go",
-    storageBucket: "wildlife-go.firebasestorage.app",
-    messagingSenderId: "191317303089",
-    appId: "1:191317303089:web:5ff60a66b538243d245a10",
-    measurementId: "G-ECPTZJ35LK"
-  };
-
 
 const firebaseApp = initializeApp(firebaseConfig);
 //const analytics = getAnalytics(app);
@@ -102,6 +94,59 @@ export async function login(email, password) {
     }
   }
 
-export async function upload(cardData) {
+export async function upload(image, username) {
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    base64Img.imgSync(image, '', 'temp', function(err, filepath) {});
 
+    const model = "gemini-2.0-flash"
+
+    const prompt = "You are a meticulous and avid wildlife expert that also loves to play games such as pokemon. Your job to help classify the animal within the picture as well as providing some stats and rarity for the animal to be used within a game similar to pokemon that has a battling system. For the animal classification, respond with the animal in singular conjugation and all in lower case. In addition, the name of the animal should be the common name of the animal such that a naive person could be satifised (E.g squirrel instead of north american red squirrel). Should there be multiple animals in the picutre, classify only the most prominent animal. There are five different types of rarity, common, uncommon, rare, super rare and legendary. There are also 6 stats, health for health (Base of 500 but do not include the 500 in your output), attack for damage (Base of 50 but do not include the 50 in your output), agility for dodge chance (Base 0 capped at 100), critical chance for critical chance (Base of 0 and capped at 100 points representing 100% chance of critical hit), critical damage for critical damage (Will increase the amount of damage by a percentage capped at 300 points representing 400% increase of damage) and defense for defense (Base 0 and will reduce a flat amount of attack coming in). First choose a rarity for how rare the animal based on how hard it would be for someone in the city to go outside and find this animal. Based on the rarity, pick a random number between plus minus 25 of the amount points that can be allocated to the stats in total based on the rarity. Common is 100 total, uncommon is 200 total, rare is 300 total, super rare is 400 total and legendary is 500 total. Then assign those points to the different stats such that it best represents the animal. Make sure that all the stats add up the the random number that you have choosen beforehand. Please respond in the following format of an object:\n\n{\n\t\"animal\": \"name of animal (string)\",\n\t\"health\": an integer,\n\t\"attack\": an integer,\n\t\"agility\": an integer,\n\t\"critical_chance\": an integer,\n\t\"critical_damage\":an integer,\n\t\"defense\": an integer, \n\t\"rarity\": \"rarity (string)\"}\n\nDo not output anything else. Also output the random number that you have choosen for the total points as an integer at the top of the response. Bit random with each stat such that each time it differes slightly. If there is no animal in the picture, respond with an object with the animal as none" 
+
+    const file = await ai.files.upload({
+      file: 'temp.jpg',
+      config: { mimeType: "image/jpeg" },
+    })
+
+    const response = await ai.models.generateContent({
+      model: model,
+      contents: createUserContent([
+        createPartFromUri(file.uri, file.mimeType),
+        "\n\n",
+        prompt
+
+      ]),
+    })
+
+    let text = response.text
+    let parsedResponse = {}
+
+    parsedResponse = JSON.parse(text.substring(text.indexOf("{")).replace("```", ""))
+
+    if (parsedResponse.animal == "none") {
+        return res.status(400).json({ "error": "No animal found in the picture" })
+    }
+
+    const auth = getAuth(); // Use the initialized client app
+    const firestore = getFirestore(firebaseApp); // Use the client Firestore instance
+
+    const userDocRef = doc(firestore, "userCards", username); // Reference to the user's document
+    const userDoc = await getDoc(userDocRef); // Fetch the document
+  
+      if (userDoc.exists()) {
+        userDoc.data().cards.push({
+            image: image,
+            animal_data: parsedResponse,
+        });
+        await updateDoc(doc(firestore, "userCards", username), {
+            cards:userDoc.data().cards});
+      } else {
+        await setDoc(doc(firestore, "userCards", username), {
+            cards:[
+                {
+                    image: image,
+                    animal_data: parsedResponse,
+                }
+            ]});
+      }
+    return true;
 }
