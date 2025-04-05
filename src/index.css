@@ -1,0 +1,79 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 150 30% 96%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 142 69% 58%;
+    --primary-foreground: 144 70% 10%;
+
+    --secondary: 217 91% 60%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 40 96% 65%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 142 69% 58%;
+
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  .stat-bar {
+    @apply h-2 bg-gray-200 rounded-full overflow-hidden;
+  }
+  
+  .stat-bar-fill {
+    @apply h-full rounded-full;
+  }
+  
+  .rarity-common {
+    @apply bg-rarity-common text-gray-900;
+  }
+  
+  .rarity-uncommon {
+    @apply bg-rarity-uncommon text-gray-900;
+  }
+  
+  .rarity-rare {
+    @apply bg-rarity-rare text-white;
+  }
+  
+  .rarity-super-rare {
+    @apply bg-rarity-super-rare text-white;
+  }
+  
+  .rarity-legendary {
+    @apply bg-rarity-legendary text-gray-900;
+  }
+}
