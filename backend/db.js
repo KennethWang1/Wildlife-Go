@@ -128,8 +128,8 @@ export async function upload(image, username) {
     parsedResponse = JSON.parse(text.substring(text.indexOf("{")).replace("```", ""))
 
     console.log(parsedResponse)
-    parsedResponse.heatlth+=500;
-    parsedResponse.attack+=50;
+    parsedResponse.health=Number(parsedResponse.health)+Number(500);
+    parsedResponse.attack=Number(parsedResponse.attack)+Number(50);
     
 
     if (parsedResponse.animal == "none") {
@@ -149,7 +149,8 @@ export async function upload(image, username) {
             animal_data: parsedResponse,
         });
         await updateDoc(doc(firestore, "userCards", username), {
-            cards:userDoc.data().cards});
+            cards:userDoc.data().cards
+        });
       } else {
         await setDoc(doc(firestore, "userCards", username), {
             cards:[
@@ -159,7 +160,7 @@ export async function upload(image, username) {
                 }
             ]});
       }
-      
+
     return parsedResponse;
 }
 
