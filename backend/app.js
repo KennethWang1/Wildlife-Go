@@ -11,7 +11,6 @@ import {GoogleGenAI, createUserContent} from '@google/genai'
 
 const app = express();
 const port = process.env.PORT || 3000;
-const uploader = multer({ storage: multer.memoryStorage() }); // Use memory storage for multer
 
 app.use(cors({
     origin: ['http://localhost:8080', 'https://localhost:3000'],
@@ -20,8 +19,9 @@ app.use(cors({
     credentials: true
 }));
 
-app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json({ limit: '100mb' }));
+app.use(bodyParser.json({ limit: '100mb', extended: true, parameterLimit: 10000000 }));
+app.use(bodyParser.urlencoded({ limit: '100mb', extended: true, parameterLimit: 10000000 }));
 
 app.post('/api/v1/signup', (req, res) => {
     const { email, password, username } = req.body;
@@ -38,21 +38,17 @@ app.get('/api/v1/login', async (req, res) => {
         res.status(401).json({ message: 'Invalid credentials' });
     }
 });
-//  uploader.single('image'),
+
 app.post('/api/v1/uploadCard', async (req, res) => {
-    const file = req.file;
-    // const username = req.body.username; // Replace with actual user ID logic
-
-    res.status(200)
-
-    return
+    const file = req.body.image; // Use req.file for multer
+    const username = req.body.username; // Replace with actual user ID logic
 
     if (!file) {
         return res.status(400).json({ success: false, message: "No file uploaded" });
     }
 
-    const result = await upload(file, userId);
-    if (result.success) {
+    const result = await upload(file, username);
+    if (result) {
         res.status(200).json({ success: true, downloadURL: result.downloadURL });
     } else {
         res.status(500).json({ success: false, message: result.message });
