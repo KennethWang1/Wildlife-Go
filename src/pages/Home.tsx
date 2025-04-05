@@ -19,90 +19,43 @@ const Home = () => {
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
 
-  function dataURItoBlob(dataURI) {
-    // convert base64/URLEncoded data component to raw binary data held in a string
-    var byteString;
-    if (dataURI.split(',')[0].indexOf('base64') >= 0)
-        byteString = atob(dataURI.split(',')[1]);
-    else
-        byteString = unescape(dataURI.split(',')[1]);
-
-    // separate out the mime component
-    var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
-
-    // write the bytes of the string to a typed array
-    var ia = new Uint8Array(byteString.length);
-    for (var i = 0; i < byteString.length; i++) {
-        ia[i] = byteString.charCodeAt(i);
-    }
-
-    return new Blob([ia], {type:mimeString});
-  }
-
-  const handleUpload = (image) => {
-    const formData = new FormData();
-
-    const file = dataURItoBlob(image);
-
-    formData.append('image', file)
-
-    return formData;
-  }
-
   const handleCapture = async (imageDataUrl: string) => {
     setIsCameraOpen(false);
     setIsClassifying(true);
 
-    fetch('/api/v1/uploadCard', {
+    fetch('http://localhost:3000/api/v1/test', {
       method: "POST",
-      body: handleUpload(imageDataUrl)
-    })
-    
-
-    try {
-      if (captureMode === 'animal') {
-        // Try to classify as an animal
-        try {
-          const animalResult = await classifyAnimalImage(imageDataUrl);
-          addAnimal({
-            ...animalResult,
-            imageUrl: animalResult.imageDataUrl
-          });
-        } catch (animalError) {
-          // If not an animal, show error
-          toast({
-            title: "Classification Failed",
-            description: "We couldn't identify an animal in this image. Please try again with a clearer picture.",
-            variant: "destructive",
-          });
-        }
+      body: JSON.stringify({
+        "image": imageDataUrl,
+      })
+    }).then(
+      response => response.json()
+    ).then(async r => {
+      if (r['error'] !== undefined) {
+        throw new Error("error")
       } else {
-        // Try to classify as a plant
-        try {
-          const plantResult = await classifyPlantImage(imageDataUrl);
-          addPlant({
-            ...plantResult,
-            imageUrl: plantResult.imageDataUrl
-          });
-        } catch (plantError) {
-          // If not a plant, show error
-          toast({
-            title: "Classification Failed",
-            description: "We couldn't identify a plant in this image. Please try again with a clearer picture.",
-            variant: "destructive",
-          });
-        }
+        r['critDamage'] = r['critical_damage']
+        r['critChance'] = r['critical_chance']
+        addAnimal({
+          name: r.name,
+          rarity: r.rarity,
+          stats: r,
+          imageDataUrl: imageDataUrl
+        })
       }
-    } catch (err) {
-      console.error('Error during classification:', err);
+    })
+    .finally(() => {
+      setIsClassifying(false);
+    })
+    .catch(err => {
+      console.log(err)
       toast({
-        title: "Error",
-        description: "Something went wrong during classification. Please try again.",
+        title: "Classification Failed",
+        description: "We couldn't identify an animal in this image. Please try again with a clearer picture.",
         variant: "destructive",
       });
-    } finally {
-      setIsClassifying(false);
-    }
+    })
+      
   };
 
   const openCamera = (mode: 'animal' | 'plant') => {
@@ -154,7 +107,7 @@ const Home = () => {
                 </div>
               </Button>
               
-              <Button 
+              {/* <Button 
                 size="lg" 
                 className="h-20 flex items-center gap-2 text-lg relative overflow-hidden bg-gradient-to-r from-green-500 to-green-700"
                 onClick={() => openCamera('plant')}
@@ -165,7 +118,7 @@ const Home = () => {
                   <Leaf size={24} />
                   <span>Gather a Plant</span>
                 </div>
-              </Button>
+              </Button> */}
               
               <Button 
                 size="lg" 
