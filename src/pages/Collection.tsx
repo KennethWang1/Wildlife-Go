@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import AnimalCard from '@/components/AnimalCard';
-import PlantCard from '@/components/PlantCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
@@ -11,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Animal, Rarity } from '@/types';
 
 const Collection = () => {
-  const { animals, plants, activeTeam, updateActiveTeam } = useGame();
+  const { animals, activeTeam, updateActiveTeam } = useGame();
   const [sortOption, setSortOption] = useState<'newest' | 'rarity' | 'name'>('newest');
   const [filterRarity, setFilterRarity] = useState<Rarity | 'all'>('all');
   
@@ -58,7 +57,6 @@ const Collection = () => {
       <Tabs defaultValue="animals">
         <TabsList className="mb-4">
           <TabsTrigger value="animals">Animals ({animals.length})</TabsTrigger>
-          <TabsTrigger value="plants">Plants ({plants.length})</TabsTrigger>
           <TabsTrigger value="team">Active Team ({activeTeam.length}/3)</TabsTrigger>
         </TabsList>
         
@@ -113,24 +111,6 @@ const Collection = () => {
                   isInActiveTeam={activeTeam.some(a => a.id === animal.id)}
                   onToggleTeam={() => toggleTeam(animal)}
                 />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="plants">
-          {plants.length === 0 ? (
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>No plants found</AlertTitle>
-              <AlertDescription>
-                You haven't discovered any plants yet. Go to the home page and take some pictures!
-              </AlertDescription>
-            </Alert>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {plants.map(plant => (
-                <PlantCard key={plant.id} plant={plant} />
               ))}
             </div>
           )}

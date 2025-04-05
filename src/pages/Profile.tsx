@@ -7,9 +7,11 @@ import { AlertCircle, Trophy, Award } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Rarity } from '@/types';
+import { useAuth } from '@/context/AuthContext';
 
 const Profile = () => {
   const { user, animals } = useGame();
+  const { logout } = useAuth();
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   
   if (!user) {
@@ -35,15 +37,6 @@ const Profile = () => {
     });
     
     return highest;
-  };
-  
-  const getCompletion = () => {
-    // This is a simplified completion calculation
-    // In a real app, you'd have a predefined total number of animals to collect
-    const estimated = 50; // Estimated total unique animals
-    const uniqueNames = new Set(animals.map(a => a.name));
-    
-    return Math.min(100, Math.floor((uniqueNames.size / estimated) * 100));
   };
   
   const resetGame = () => {
@@ -79,10 +72,6 @@ const Profile = () => {
             <div className="flex justify-between items-center">
               <span>Unique Species</span>
               <span className="font-bold">{new Set(animals.map(a => a.name)).size}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>Collection Complete</span>
-              <span className="font-bold">{getCompletion()}%</span>
             </div>
           </CardContent>
         </Card>
@@ -220,11 +209,16 @@ const Profile = () => {
         </div>
       )}
       
-      <div className="mt-8 border-t pt-6">
-        <h2 className="text-xl font-semibold mb-4">Game Options</h2>
-        <Button variant="destructive" onClick={() => setIsResetDialogOpen(true)}>
-          Reset Game Data
-        </Button>
+      <div className="mt-8 border-t pt-6 space-y-4">
+        <h2 className="text-xl font-semibold mb-4">Account Options</h2>
+        <div className="flex flex-wrap gap-4">
+          <Button variant="outline" onClick={logout}>
+            Logout
+          </Button>
+          <Button variant="destructive" onClick={() => setIsResetDialogOpen(true)}>
+            Reset Game Data
+          </Button>
+        </div>
       </div>
       
       <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
